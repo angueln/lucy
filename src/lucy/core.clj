@@ -1,7 +1,6 @@
 (ns lucy.core
   (:gen-class))
 
-(require '[clojure.core.reducers :as r])
 (require '[com.climate.claypoole :as cp])
 
 (import 'org.apache.commons.math3.complex.Complex
@@ -60,8 +59,7 @@
    real-range
    imaginary-range
    iteration-limit
-   num-threads
-   granularity]
+   num-threads]
   (let [image (BufferedImage. canvas-width canvas-height
                               BufferedImage/TYPE_3BYTE_BGR)
 
@@ -97,7 +95,6 @@
     (.addOption options "r" "rect" true
                 "Region in the complex plane to be displayed.")
     (.addOption options "t" "tasks" true "Number of threads to use.")
-    (.addOption options "g" "granularity" true "Granularity to use.")
     (.addOption options "o" "output" true "Filename for output.")
     (.addOption options "q" "quiet" false
                 "Don't print messages about threads.")
@@ -117,13 +114,12 @@
          num-threads       (Integer/parseInt (or (arg "t") "1"))
          print-messages    (.hasOption args "q")
          iteration-limit   20
-         output-file       (or (arg "o") "zad17.png")
-         granularity       (Integer/parseInt (or (arg "g") "512"))]
+         output-file       (or (arg "o") "zad17.png")]
       (time (ImageIO/write (draw-fractal exp-cos-x-c
                                    canvas-dimensions
                                    real-range imaginary-range
                                    iteration-limit
-                                   num-threads
-                                   granularity)
+                                   num-threads)
                      "png"
-                     (File. output-file))))))
+                     (File. output-file)))))
+  (shutdown-agents))
