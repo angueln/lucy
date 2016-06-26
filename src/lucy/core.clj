@@ -63,26 +63,17 @@
   (let [image (BufferedImage. canvas-width canvas-height
                               BufferedImage/TYPE_3BYTE_BGR)
 
-        canvas-indices (vec (for [x (range canvas-width)
-                                  y (range canvas-height)]
-                              [x y]))
-
-        pixel-to-complex (fn [[x y]]
-                           (Complex. (pixel-coordinate-to-point
-                                      x canvas-width real-range)
-                                     (pixel-coordinate-to-point
-                                      y canvas-height imaginary-range)))
-
-        iterations-for-pixel (fn [pixel]
-                               (iterations-to-unbounded
-                                (iterator-map (pixel-to-complex pixel))
-                                iteration-limit))
-
-        canvas-colors (cp/pmap num-threads
-                               (juxt identity
-                                     (comp iterations-to-color
-                                           iterations-for-pixel))
-                               canvas-indices)]
+        canvas-colors (cp/pfor num-threads
+                               [x (range canvas-width)
+                                y (range canvas-height)
+                                :let [c (Complex. (pixel-coordinate-to-point
+                                                  x canvas-width real-range)
+                                                 (pixel-coordinate-to-point
+                                                  y canvas-height
+                                                  imaginary-range))]]
+                               [[x y] (iterations-to-color
+                                       (iterations-to-unbounded
+                                        (iterator-map c) iteration-limit))])]
 
     (doseq [[[x y] color] canvas-colors]
       (.setRGB image x y color))
@@ -112,14 +103,23 @@
          real-range        [r1 r2]
          imaginary-range   [i1 i2]
          num-threads       (Integer/parseInt (or (arg "t") "1"))
-         print-messages    (.hasOption args "q")
+         print-messages    (not (.hasOption args "q"))
          iteration-limit   20
          output-file       (or (arg "o") "zad17.png")]
-      (time (ImageIO/write (draw-fractal exp-cos-x-c
-                                   canvas-dimensions
-                                   real-range imaginary-range
-                                   iteration-limit
-                                   num-threads)
-                     "png"
-                     (File. output-file)))))
+      (when print-messages
+        (println "Running with pool of" num-threads "threads."))
+
+      (if print-messages
+        (time (ImageIO/write (draw-fractal exp-cos-x-c
+                                           canvas-dimensions
+                                           real-range imaginary-range
+                                           iteration-limit
+                                           num-threads)
+                             "png" (File. output-file)))
+        (ImageIO/write (draw-fractal exp-cos-x-c
+                                     canvas-dimensions
+                                     real-range imaginary-range
+                                     iteration-limit
+                                     num-threads)
+                       "png" (File. output-file)))))
   (shutdown-agents))
