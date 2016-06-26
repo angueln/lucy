@@ -10,16 +10,17 @@
         'javax.imageio.ImageIO)
 
 (defn exp-cos-x-c
-  "The next number in the sequence a_n = exp(cos(c a_{n-1})), for some
-  constant c."
-  [c a]
-  (.exp (.cos (.multiply a c))))
+  "Returns the iterative function generating the next number in the
+  sequence a_n = exp(cos(c a_{n-1})), for some constant c."
+  [c]
+  (fn [a]
+    (.exp (.cos (.multiply a c)))))
 
 (defn iterations-to-unbounded
-  "Checks if the orbit map-fun(map-fun( ... map-fun(0))) of 0 under
+  "Checks if the orbit iterator(iterator( ... iterator(0))) of 0 under
   iteration of map-fun *looks* bounded - i.e. does it reach Infinity
   after iteration-limit iterations."
-  [map-fun iteration-limit]
+  [iterator iteration-limit]
   (let [finite? #(not (or (.isInfinite %)
                           (.isNaN      %)))]
     (loop [point     (Complex. 0.0 0.0)
@@ -27,8 +28,25 @@
       (if (= iteration iteration-limit)
         nil
         (if (finite? (.abs point))
-          (recur (map-fun point) (inc iteration))
+          (recur (iterator point) (inc iteration))
           iteration)))))
+
+(defn pixel-coordinate-to-point
+  "Converts a pixel coordinate to a real number in the range
+  lower-bound to upper-bound."
+  [pixel canvas-size [lower-bound upper-bound]]
+  (+ lower-bound (* (/ pixel canvas-size)
+                    (- upper-bound lower-bound))))
+
+
+(defn iterations-to-color
+  "Converts a number of iterations or nil value to a RGB color between
+  0x000000 to 0xFFFFFF. Nils are green and numbers are a gradient of blue."
+  [iterations]
+  (if iterations
+    (int (* 256
+            (- 1 (java.lang.Math/pow 0.75 iterations))))
+    0x00FF00))
 
 (defn draw-fractal
   "Returns a cavas-width by canvas-height BufferedImage of fractal set
@@ -47,33 +65,21 @@
                                   y (range canvas-height)]
                               [x y]))
 
-        pixel-index-to-point (fn [pixel canvas-size [lower-bound upper-bound]]
-                               (+ lower-bound (* (/ pixel canvas-size)
-                                                 (- upper-bound lower-bound))))
-
         pixel-to-complex (fn [[x y]]
-                           (Complex. (pixel-index-to-point x
-                                                           canvas-width
-                                                           real-range)
-                                     (pixel-index-to-point y
-                                                           canvas-height
-                                                           imaginary-range)))
+                           (Complex. (pixel-coordinate-to-point
+                                      x canvas-width real-range)
+                                     (pixel-coordinate-to-point
+                                      y canvas-height imaginary-range)))
 
         iterations-for-pixel (fn [pixel]
                                (iterations-to-unbounded
-                                (partial iterator-map (pixel-to-complex pixel))
+                                (iterator-map (pixel-to-complex pixel))
                                 iteration-limit))
 
-        color-for-pixel (fn [pixel]
-                          (if-let [iterations (iterations-for-pixel pixel)]
-                            (int (* 256
-                                    (- 1 (/ iterations
-                                            iteration-limit))))
-                            0x00FF00))
-
-        canvas-colors (r/fold concat
-                              conj
-                              (r/map #(vector % (color-for-pixel %))
+        canvas-colors (r/fold concat conj
+                              (r/map (juxt identity
+                                           (comp iterations-to-color
+                                                 iterations-for-pixel))
                                      canvas-indices))]
 
     (doseq [[[x y] color] canvas-colors]
@@ -81,8 +87,8 @@
     image))
 
 (def output-file "fractal")
-(def canvas-width 2000)
-(def canvas-height 2000)
+(def canvas-width 100)
+(def canvas-height 100)
 (def real-range [-1.0 1.0])
 (def imaginary-range [-1.0 1.0])
 (def iteration-limit 15)
