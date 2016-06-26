@@ -1,3 +1,5 @@
+(require '[clojure.core.reducers :as r])
+
 (ns lucy.core
   (:gen-class))
 
@@ -13,66 +15,78 @@
   [c a]
   (.exp (.cos (.multiply a c))))
 
-(defn iterations-to-bounded
+(defn iterations-to-unbounded
   "Checks if the orbit map-fun(map-fun( ... map-fun(0))) of 0 under
   iteration of map-fun *looks* bounded - i.e. does it reach Infinity
   after iteration-limit iterations."
   [map-fun iteration-limit]
   (let [finite? #(not (or (.isInfinite %)
                           (.isNaN      %)))]
-    (loop [point (Complex. 0.0 0.0)
-           index 0]
-      (if (= index iteration-limit)
+    (loop [point     (Complex. 0.0 0.0)
+           iteration 0]
+      (if (= iteration iteration-limit)
         nil
-        (if (finite? point)
-          (recur (map-fun point) (inc index))
-          index)))))
+        (if (finite? (.abs point))
+          (recur (map-fun point) (inc iteration))
+          iteration)))))
 
 (defn draw-fractal
-  "Returns cavas-width by canvas-height BufferedImage of fractal set
+  "Returns a cavas-width by canvas-height BufferedImage of fractal set
   described by iterator-map in real-range and imaginary-range.
-  Boundedness determined for iteration-limit iterations."
+  boundedness determined for iteration-limit iterations."
   [iterator-map
    canvas-width
    canvas-height
    real-range
    imaginary-range
    iteration-limit]
-  (let [image          (BufferedImage. canvas-width canvas-height
-                                       BufferedImage/TYPE_3BYTE_BGR)
-        pixel-to-point (fn [pixel canvas-size [lower-bound upper-bound]]
-                         (+ lower-bound (* (/ pixel canvas-size)
-                                           (- upper-bound lower-bound))))]
-    (doseq [x (range canvas-width)
-            y (range canvas-height)
-            :let [c (Complex. (pixel-to-point x canvas-width  real-range)
-                              (pixel-to-point y canvas-height imaginary-range))
-                  iterator (partial iterator-map c)]]
-      (println "Calculating pixel [ " x ", " y " ]")
+  (let [image (BufferedImage. canvas-width canvas-height
+                              BufferedImage/TYPE_3BYTE_BGR)
 
-      (if-let [iterations (iterations-to-bounded iterator iteration-limit)]
-        (do
-          (println "Found to be unbounded after " iterations " iterations.")
-          (.setRGB image x y (+ 0xFFFF00 (* 255
-                              (- 1 (/ iterations
-                                      iteration-limit))))))
-        (do
-          (println "Bounded.")
-          (.setRGB image x y 0x0000FF))))
+        canvas-indices (vec (for [x (range canvas-width)
+                                  y (range canvas-height)]
+                              [x y]))
+
+        pixel-index-to-point (fn [pixel canvas-size [lower-bound upper-bound]]
+                               (+ lower-bound (* (/ pixel canvas-size)
+                                                 (- upper-bound lower-bound))))
+
+        pixel-to-complex (fn [[x y]]
+                           (Complex. (pixel-index-to-point x
+                                                           canvas-width
+                                                           real-range)
+                                     (pixel-index-to-point y
+                                                           canvas-height
+                                                           imaginary-range)))
+
+        iterations-for-pixel (fn [pixel]
+                               (println "Calculating pixel " pixel)
+                               (iterations-to-unbounded
+                                (partial iterator-map (pixel-to-complex pixel))
+                                iteration-limit))
+
+        color-for-pixel (fn [pixel]
+                          (if-let [iterations (iterations-for-pixel pixel)]
+                            (int (* 256
+                                    (- 1 (/ iterations
+                                            iteration-limit))))
+                            0x00FF00))
+
+        canvas-colors (map #(vector % (color-for-pixel %)) canvas-indices)]
+
+    (doseq [[[x y] color] canvas-colors]
+      (.setRGB image x y color))
     image))
 
 (def output-file "fractal")
-(def canvas-width 3000)
-(def canvas-height 3000)
-(def real-range [-2.0 2.0])
-(def imaginary-range [-2.0 2.0])
-(def iteration-limit 10)
-(def num-threads 4)
+(def canvas-width 600)
+(def canvas-height 600)
+(def real-range [-1.0 1.0])
+(def imaginary-range [-1.0 1.0])
+(def iteration-limit 15)
 (def output-file "fractal")
 
-(defn -main
-  "I don't do a whole lot ... yet."
-  [& args]
+(defn -main [& args]
   (ImageIO/write (draw-fractal exp-cos-x-c
                                canvas-width
                                canvas-height
