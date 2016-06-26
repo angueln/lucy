@@ -1,7 +1,7 @@
-(require '[clojure.core.reducers :as r])
-
 (ns lucy.core
   (:gen-class))
+
+(require '[clojure.core.reducers :as r])
 
 (import 'org.apache.commons.math3.complex.Complex
         'java.io.File
@@ -60,7 +60,6 @@
                                                            imaginary-range)))
 
         iterations-for-pixel (fn [pixel]
-                               (println "Calculating pixel " pixel)
                                (iterations-to-unbounded
                                 (partial iterator-map (pixel-to-complex pixel))
                                 iteration-limit))
@@ -72,15 +71,18 @@
                                             iteration-limit))))
                             0x00FF00))
 
-        canvas-colors (map #(vector % (color-for-pixel %)) canvas-indices)]
+        canvas-colors (r/fold concat
+                              conj
+                              (r/map #(vector % (color-for-pixel %))
+                                     canvas-indices))]
 
     (doseq [[[x y] color] canvas-colors]
       (.setRGB image x y color))
     image))
 
 (def output-file "fractal")
-(def canvas-width 600)
-(def canvas-height 600)
+(def canvas-width 2000)
+(def canvas-height 2000)
 (def real-range [-1.0 1.0])
 (def imaginary-range [-1.0 1.0])
 (def iteration-limit 15)
