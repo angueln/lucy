@@ -9,9 +9,9 @@ A project for the Systems for Parallel Processing course at FMI.
 
 The goal is to generate a png image of the fractal set of values of c
 in the complex plane for which the orbit of 0 under iteration of the
-quadratic
+quadratic map
 ```
-map z_{n+1} = exp(cos(c * z_{n-1}))
+z_{n+1} = exp(cos(c * z_{n-1}))
 ```
 remains bounded.
 
