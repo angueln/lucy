@@ -11,7 +11,7 @@ The goal is to generate a png image of the fractal set of values of c
 in the complex plane for which the orbit of 0 under iteration of the
 quadratic
 ```
-map z_{n+1} = exp(cos(z_{n-1} c))
+map z_{n+1} = exp(cos(c * z_{n-1}))
 ```
 remains bounded.
 
