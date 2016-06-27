@@ -15,6 +15,10 @@ map z_{n+1} = exp(cos(c * z_{n-1}))
 ```
 remains bounded.
 
+There is also a
+[design doc](docs.google.com/document/d/1w_aBWSc3Ac8_EZ7S_cPLk7X6HapUGdtNHkg4S0MU0HM)
+in Bulgarian.
+
 ## Installation
 
 Download from https://github.com/angueln/lucy.
