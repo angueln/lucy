@@ -21,7 +21,8 @@
 (defn iterations-to-unbounded
   "Checks if the orbit iterator(iterator( ... iterator(0))) of 0 under
   iteration of map-fun *looks* bounded - i.e. does it reach Infinity
-  after iteration-limit iterations."
+  within iteration-limit iterations. If no returns nil, otherwise
+  returns the number of the iteration where it does."
   [iterator iteration-limit]
   (let [finite? #(not (or (.isInfinite %)
                           (.isNaN      %)))]
@@ -48,7 +49,7 @@
   (if iterations
     (int (* 256
             (- 1 (java.lang.Math/pow 0.75 iterations))))
-    0x00FF00))
+    0xFFFFFF))
 
 (defn draw-fractal
   "Returns a cavas-width by canvas-height BufferedImage of fractal set
