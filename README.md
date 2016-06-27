@@ -26,7 +26,7 @@ Download from https://github.com/angueln/lucy.
     $ git clone https://github.com/angueln/lucy.git
 
 ## Usage
-### With a standalone jar.
+### With a Standalone Jar
     $ lein uberjar
     $ java -jar lucy-0.1.0-SNAPSHOT-standalone.jar [options]
 
