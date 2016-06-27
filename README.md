@@ -1,6 +1,6 @@
-![alt text](https://github.com/angueln/lucy/blob/master/header.png "A region of the fractal")
-
 # Lucy
+
+![alt text](https://github.com/angueln/lucy/blob/master/header.png "A region of the fractal")
 
 A project for the Systems for Parallel Processing course at FMI.
 
