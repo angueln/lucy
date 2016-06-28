@@ -99,6 +99,10 @@
     (.addOption options "o" "output" true "Filename for output.")
     (.addOption options "q" "quiet" false
                 "Don't print messages about threads.")
+    (.addOption options "m" "mandelbrot" false
+                "Generate the Mandelbrot set instead.")
+    (.addOption options "i" "iterations" true
+                "Set max number of iterations.")
 
     (let
         [args (.parse parser options (into-array (conj args "")))
@@ -114,13 +118,15 @@
          imaginary-range   [i1 i2]
          num-threads       (Integer/parseInt (or (arg "t") "1"))
          print-messages    (not (.hasOption args "q"))
-         iteration-limit   20
+         iteration-limit   (Integer/parseInt (or (arg "i") "20"))
          output-file       (or (arg "o") "zad17.png")]
       (when print-messages
         (println "Running with pool of" num-threads "threads."))
 
       (if print-messages
-        (time (ImageIO/write (draw-fractal exp-cos-x-c
+        (time (ImageIO/write (draw-fractal (if (.hasOption args "m")
+                                             x-squared-plus-c
+                                             exp-cos-x-c)
                                            canvas-dimensions
                                            real-range imaginary-range
                                            iteration-limit
