@@ -11,6 +11,15 @@
         'org.apache.commons.cli.DefaultParser
         'org.apache.commons.cli.Options)
 
+
+(defn x-squared-plus-c
+  "Returns the iterative function generating the next number in the
+  sequence a_n = a^2 + c, for some constant c. This is the function
+  for the Mandelbrot set."
+  [c]
+  (fn [a]
+    (.add (.multiply a a) c)))
+
 (defn exp-cos-x-c
   "Returns the iterative function generating the next number in the
   sequence a_n = exp(cos(c a_{n-1})), for some constant c."
