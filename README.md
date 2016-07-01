@@ -11,7 +11,7 @@ The goal is to generate a png image of the fractal set of values of c
 in the complex plane for which the orbit of 0 under iteration of the
 quadratic map
 ```
-z_{n+1} = exp(cos(c * z_{n-1}))
+z_n = exp(cos(c * z_{n-1}))
 ```
 remains bounded.
 
@@ -39,11 +39,11 @@ Download from https://github.com/angueln/lucy.
 The following command line options are recognized:
 
 * `-s` or `-size` - dimensions of the canvas
-   *width-in-px*x*height-in-px*, `480x480` by default;
+   `<width-in-px>x<height-in-px>`, `480x480` by default;
 
 * `-r` or `-rect` - bounds of the area of the complex plane to be
      drawn in the format
-     *min-real-value*:*max-real-value*:*min-imaginary-value*:*max-imaginary-value*,
+     `<min-real-value>:<max-real-value>:<min-imaginary-value>:<max-imaginary-value>`,
      `-2.0:2.0:-2.0:2.0` by default;
 
 * `-t` or `-tasks` - the number of threads to be used, `1` by default;
