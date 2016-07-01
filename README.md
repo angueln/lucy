@@ -58,8 +58,7 @@ The following command line options are recognized:
   when calculating for a pixel, `20` by default.
 
 ## Examples
-
-   $ lein run -r -1.0:1.0:-1.0:0.0 -s 800x400 -o a-pretty-fractal.png -t 4
+    $ lein run -r -1.0:1.0:-1.0:0.0 -s 800x400 -o a-pretty-fractal.png -t 4
 
 ## License
 
