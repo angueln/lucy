@@ -39,11 +39,11 @@ Download from https://github.com/angueln/lucy.
 The following command line options are recognized:
 
 * `-s` or `-size` - dimensions of the canvas
-   *<width-in-px>x<height-in-px>*, `480x480` by default;
+   *width-in-px*x*height-in-px*, `480x480` by default;
 
 * `-r` or `-rect` - bounds of the area of the complex plane to be
      drawn in the format
-     *<min-real-value>:<max-real-value>:<min-imaginary-value>:<max-imaginary-value>*,
+     *min-real-value*:*max-real-value*:*min-imaginary-value*:*max-imaginary-value*,
      `-2.0:2.0:-2.0:2.0` by default;
 
 * `-t` or `-tasks` - the number of threads to be used, `1` by default;
